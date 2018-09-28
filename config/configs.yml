@@ -1,0 +1,28 @@
+train_params:
+  batch_size: 1
+  z_dim: 128
+  record_summary_after_n_steps: 10
+  record_summaries_every_n_global_steps: 100
+  base_path: "./tflogs"
+
+optimizer_params:
+  beta1: 0.0
+  beta2: 0.9
+  learning_rate_generator: 0.0001
+  learning_rate_discriminator: 0.0004
+
+generator_params:
+  k: 16
+  weight_decay: 0.001
+  num_classes: 3
+  units_per_block: [32,16,16,8,4,2]
+  momentum: 0.95
+  epsilon: 0.0001
+
+discriminator_params:
+  k: 16
+  weight_decay: 0.001
+  num_classes: 1
+  units_per_block: [4,8,16,16,32]
+  momentum: 0.95
+  epsilon: 0.0001
