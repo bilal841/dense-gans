@@ -46,6 +46,10 @@ disc_root = tfe.Checkpoint(optimizer=discriminator_optimizer,
                            model=discriminator_net,
                            optimizer_step=global_step)
 
+number_of_test_images = 16
+# generate sample noise for evaluation
+fake_input_test = tf.random_normal(shape=(number_of_test_images, hyper_params["z_dim"]), dtype=tf.float32)
+
 for (batch, (batch_annotations)) in enumerate(train_dataset):
   fake_input = tf.random_normal(shape=(hyper_params["batch_size"], hyper_params["z_dim"]), dtype=tf.float32)
   print("batch_annotations:",batch_annotations.shape)
@@ -74,6 +78,10 @@ for (batch, (batch_annotations)) in enumerate(train_dataset):
       dis_loss = discriminator_loss(d_logits_real, d_logits_fake)
       print("dis_loss:", dis_loss)
 
+    tf.contrib.summary.scalar('generator_loss', gen_loss)
+    tf.contrib.summary.scalar('discriminator_loss', dis_loss)
+    tf.contrib.summary.image('generator_image', tf.to_float(g_model), max_images=5)
+
     discriminator_grads = d_tape.gradient(dis_loss, discriminator_net.weights)
     generator_grads = g_tape.gradient(gen_loss, generator_net.weights)
 
@@ -83,3 +91,11 @@ for (batch, (batch_annotations)) in enumerate(train_dataset):
     print("Generator # of params:",len(generator_net.weights))
     generator_optimizer.apply_gradients(zip(generator_grads, generator_net.weights),
                                         global_step=global_step)
+
+  counter = global_step.numpy()
+
+  if counter % 2000 == 0:
+      print("Current step:", counter)
+      with tf.contrib.summary.always_record_summaries():
+          generated_samples = generator_net(fake_input_test, is_training=False)
+          tf.contrib.summary.image('test_generator_image', tf.to_float(generated_samples), max_images=16)
